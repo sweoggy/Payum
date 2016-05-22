@@ -21,19 +21,19 @@ class StatusAction implements ActionInterface
         /** @var Payment $model */
         $model = $request->getModel();
 
-        if (isset($model->state) && 'approved' == $model->state) {
+        if ($model->getState() !== null && 'approved' == $model->state) {
             $request->markCaptured();
 
             return;
         }
 
-        if (isset($model->state) && 'created' == $model->state) {
+        if ($model->getState() !== null && 'created' == $model->state) {
             $request->markNew();
 
             return;
         }
 
-        if (false == isset($model->state)) {
+        if ($model->getState() === null) {
             $request->markNew();
 
             return;

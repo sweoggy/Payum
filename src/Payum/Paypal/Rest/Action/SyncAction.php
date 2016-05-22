@@ -24,7 +24,7 @@ class SyncAction implements ActionInterface, GatewayAwareInterface
         /** @var PaypalPayment $model */
         $model = $request->getModel();
 
-        $payment = PaypalPayment::get($model->id);
+        $payment = PaypalPayment::get($model->getId());
 
         $model->fromArray($payment->toArray());
     }

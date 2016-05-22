@@ -32,38 +32,42 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface, ApiAwareI
         /** @var $request Capture */
         RequestNotSupportedException::assertSupports($this, $request);
 
-        /** @var PaypalPayment $model */
+        /** @var \PayPal\Api\Payment $model */
         $model = $request->getModel();
 
         if (
-            false == isset($model->state) &&
-            isset($model->payer->payment_method) &&
-            'paypal' == $model->payer->payment_method
+            $model->getState() === null &&
+            $model->getPayer() !== null && 
+            $model->getPayer()->getPaymentMethod() !== null &&
+            'paypal' == $model->getPayer()->getPaymentMethod()
         ) {
             $model->create($this->api);
 
-            foreach ($model->links as $link) {
-                if ($link->rel == 'approval_url') {
-                    throw new HttpRedirect($link->href);
+            /** @var \PayPal\Api\Links $link */
+            foreach ($model->getLinks() as $link) {
+                if ($link->getRel() == 'approval_url') {
+                    throw new HttpRedirect($link->getHref());
                 }
             }
         }
 
         if (
-            false == isset($model->state) &&
-            isset($model->payer->payment_method) &&
-            'credit_card' == $model->payer->payment_method
+            $model->getState() === null &&
+            $model->getPayer() !== null && 
+            $model->getPayer()->getPaymentMethod() !== null &&
+            'credit_card' == $model->getPayer()->getPaymentMethod()
         ) {
             $model->create($this->api);
         }
 
         if (
-            true == isset($model->state) &&
-            isset($model->payer->payment_method) &&
-            'paypal' == $model->payer->payment_method
+            $model->getState() !== null &&
+            $model->getPayer() !== null && 
+            $model->getPayer()->getPaymentMethod() !== null &&
+            'paypal' == $model->getPayer()->getPaymentMethod()
         ) {
             $execution = new PaymentExecution();
-            $execution->payer_id = $_GET['PayerID'];
+            $execution->setPayerId($_GET['PayerID']);
 
             //Execute the payment
             $model->execute($execution, $this->api);
